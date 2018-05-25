@@ -30,8 +30,20 @@ class sale_order(models.Model):
         }
         return action
 
+    @api.depends('invoice_ids.state')
+    def find_status(self):
+        for rec in self:
+            if rec.invoice_ids:
+                for invoice in rec.invoice_ids:
+                    if invoice.state == 'paid':
+                        rec.status = 'paid'
+                    else:
+                        rec.status = 'unpaid'
+            else:
+                rec.status = 'Create Invoice'
     gross_weight = fields.Float("Gross Weight",compute="_get_weight")
     company_type = fields.Selection("Company Type",related="partner_id.company_type")
+    status = fields.Char("invoice Status", compute="find_status")
 
 
 

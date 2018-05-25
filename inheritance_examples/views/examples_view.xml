@@ -45,8 +45,40 @@
                     <attribute name="readonly">1</attribute>
                 </xpath>
 
+                <xpath expr="//field[@name='payment_term_id']" position="after">
+                    <field name="status"/>
+                </xpath>
+
             </field>
         </record>
+
+        <record id="inherit_view_order_tree" model="ir.ui.view">
+            <field name="name">inherit.view.order.filter</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='state']" position="after">
+                    <field name="status"/>
+                </xpath>
+
+            </field>
+        </record>
+
+        <record id="inherit_view_sales_order_filter" model="ir.ui.view">
+            <field name="name">inherit.view.sales.order.filter</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//filter[@name='activities_upcoming_all']" position="after">
+                    <filter string="Paid sale orders" name="Paid_sale_orders"
+                        domain="[('status','=','paid')]"/>
+                </xpath>
+
+            </field>
+        </record>
+
 
         <record id="sale_order_line_wizard" model="ir.ui.view">
             <field name="name">sale.order.line.wizard</field>
