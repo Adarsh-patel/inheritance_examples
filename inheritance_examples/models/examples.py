@@ -1,4 +1,6 @@
 from odoo import api,models,fields,_
+import re
+from odoo.exceptions import ValidationError,UserError
 
 class purchase_order_line(models.Model):
     _inherit = 'purchase.order.line'
@@ -36,14 +38,14 @@ class sale_order(models.Model):
             if rec.invoice_ids:
                 for invoice in rec.invoice_ids:
                     if invoice.state == 'paid':
-                        rec.status = 'paid'
+                        rec.paid = 'paid'
                     else:
-                        rec.status = 'unpaid'
+                        rec.paid = 'unpaid'
             else:
                 rec.status = 'Create Invoice'
     gross_weight = fields.Float("Gross Weight",compute="_get_weight")
     company_type = fields.Selection("Company Type",related="partner_id.company_type")
-    status = fields.Char("invoice Status", compute="find_status")
+    paid = fields.Char("paid Status", compute="find_status",store=True)
 
 
 
@@ -69,3 +71,26 @@ class sale_order_wizard(models.TransientModel):
             })
 
             print ("\n\norder_line------>", order_line)
+
+
+class res_partner(models.Model):
+    _inherit="res.partner"
+
+    @api.multi
+    @api.onchange('email')
+    def validate_email(self):
+        if self.email:
+            result= re.match('^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*@[a-zA-Z]+(.)+[a-zA-Z{2-4}]$', self.email)
+            if result is None:
+                raise ValidationError('Please Enter a Email in valid Format e.g. adarsh@gmail.com')
+
+
+class account_invoice(models.Model):
+    _inherit="account.invoice"
+
+    @api.multi
+    def unlink(self):
+        for order in self:
+            if order.amount_total > 10000:
+                raise UserError(_('The invoice is not deleted because the total of invoice is grater than 10000.'))
+        return super(account_invoice, self).unlink()
