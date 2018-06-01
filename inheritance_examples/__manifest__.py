@@ -5,6 +5,8 @@
     'depends':['base','purchase','sale_management'],
     'data':[
         'views/examples_view.xml',
+        'views/training_view.xml',
+        'data/ir_sequence_data.xml',
     ],
 
     'installable':True,
